@@ -1,0 +1,45 @@
+# ============================================================
+# Workspace Template Repository .gitignore
+# ------------------------------------------------------------
+# 本文件只忽略模板仓库层面的非框架产物。
+# 模板本身不含项目源码；实际项目从本模板复制后，
+# 应使用项目自己的 .gitignore（见 templates/project/.gitignore）。
+# ============================================================
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- WorkBuddy / AI agent local cache ---
+.workbuddy/
+.workbuddy-ai/
+
+# --- Runtime data ---
+data/
+Claw/
+
+# --- Claude Code local state ---
+.claude/
+
+# --- Nested projects（模板仓库不含实际项目） ---
+projects/*/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- Node ---
+node_modules/
+
+# --- Temp ---
+*.tmp
+*.log
