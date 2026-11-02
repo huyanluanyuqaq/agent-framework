@@ -182,6 +182,63 @@ Non-Scope (files):
 **Next Action：** {{接收方的第一个具体动作}}
 
 ---
++
+
+## Merge Record
+
+> **本节不随「Pass/收尾」填写。** 按 D13-C 选项 C（`.agents/rules/github.md` §2 / §6、
+> `AGENTS.md` §14.2），本表由**下一个任务**在回收本任务归档时回填；
+> 在此之前任务保持 `Status = REVIEW`、留在 `tasks/review/`（机制，非遗漏）。
+> **禁止在本任务内自我回写**（那会造成档案与提交历史不一致）。
+> 回填时九要素必须填实测值（可被 `gh api` / Tags API 复现），不得沿用档案自述；
+> 无合并前独立审查档时，「审查记录」行须如实写「无（A3 断档）」，**不得补写、不得伪造**。
+>
+> **本节的章节位置固定：位于 `## Handoff` 之后、`## Task Rules` 之前**
+> （由 `scripts/audit-repo.py` F8 门禁保证一致。该门禁**同时校验本模板自身**
+> 与 `tasks/**/TASK.md` 中 TASK-047 起的档案 —— 模板若不在检范围内，
+> 这句「由 F8 保证」对模板自己仍是空话。
+> **TASK-026~046 的历史档案豁免位置校验**：实测有 10 个已归档档案的
+> `## Merge Record` 位于 `## Handoff` **之前**（历史约定本就是相反顺序），
+> 按「不回溯重排历史档案」原则显式登记于脚本的 `F8_MERGE_RECORD_POSITION_EXEMPT`
+> （含理由与登记日期 2026-10-21）。位置约束**只对 TASK-047 起的新任务生效**。
+> 编号唯一性白名单（HD-1）同为显式清单，见该脚本头部注释。）
+
+| 要素 | 值 |
+|------|-----|
+| PR | 待回填（{{PR 号与合并执行者}}） |
+| 合并策略 | rebase-merge（`AGENTS.md` §14.2 默认） |
+| 提交数 | 待回填（实测 `gh api repos/:owner/:repo/pulls/<N>/commits --jq 'length'`） |
+| merged_at | 待回填（实测 `gh api repos/:owner/:repo/pulls/<N>`） |
+| merge_commit_sha | 待回填（全 40 位 SHA） |
+| 合并后 CI run | 待回填（`actions/runs?head_sha=<SHA>` 实测 id + conclusion） |
+| 合并后 Docker run | 待回填（同上；docker.yml 触发的 run id + 镜像 tag） |
+| 镜像 tag | 待回填（`sha-<短SHA>`，DockerHub Tags API 实证在位） |
+| 审查记录 | 待回填（指向 `handoffs/YYYY-MM-DD-review.md`；无则如实写「无（A3 断档）」，不补写） |
+
+### SHA 映射表（rebase-merge 改写 SHA 时强制要求）
+
+> **触发条件：** 合并策略为 `rebase-merge` 且 rebase 重写了原分支提交的 SHA 时，**必须**在
+> `Merge Record` 的「审查记录」行之后附上本表。若 rebase 基点未变、SHA 保持原样，可跳过本表。
+
+**两种判据方法及适用条件**
+
+| 判据方法 | 适用条件 | 命令 / 说明 |
+|---------|---------|------------|
+| 新旧 **tree 相同** | rebase 基点**未变**（新基 SHA = 旧基 SHA）；`git diff --quiet <旧SHA> <新SHA> --` 返回 0 | 逐对文件 tree 相同即为等效；TASK-055 实证（9/9 tree 相同） |
+| 新旧 **patch-id 相同** | rebase 基点**前移**（新基 SHA ≠ 旧基 SHA，因中间有其它合并）；此时逐对 tree 已不同 | `git show --format= <旧SHA> \| git patch-id --stable` vs 新 SHA 同上；TASK-056 实证（10/10 patch-id 相同） |
+
+**验证纪律：**
+- **必须自行验证，不得照抄档案里的旧值**。每次合并前独立运行上述命令，把实测值填入本表；
+  若因历史 SHA 已不可达而无法验证，须在「备注」列注明原因与替代判据。
+- **反向验证（强制）：** 旧 SHA 在 `main` 上必须不可达：
+  `git merge-base --is-ancestor <旧SHA> main && echo FAIL || echo PASS` 必须输出 `PASS`。
+  若输出 `FAIL`（旧 SHA 仍可达），须先查明原因（可能 rebase 未生效）再合入。
+
+**参考先例（仅供格式参考，内容须自行实测）：**
+- TASK-055：旧基 `2ca5d50` = 新基，tree 相同判据，9/9 文件等效。
+- TASK-056：旧基 `2ca5d50` → 新基 `d7cb861`（前移），patch-id 相同判据，10/10 文件等效。
+
+---
 
 ## Task Rules
 
