@@ -1,0 +1,27 @@
+{
+  "framework": "agent-framework",
+  "version": "2.0.0",
+  "source": "huyanluanyuqaq/agent-framework",
+  "released": "2026-11-04",
+  "changelog": [
+    {
+      "version": "2.0.0",
+      "date": "2026-11-04",
+      "type": "MAJOR",
+      "summary": "框架收敛重构：8 角色+双协作位+5 工作流 → 三角色；36 篇规范 → 7 篇；引入任务分级 S/M/L；统一分支 type 词表；废弃 D13-C 跨任务回填；确立 agent-framework 为唯一权威源",
+      "breaking": [
+        ".agents/ 结构由 roles/workflows/rules/protocols 四层改为 7 篇平铺规范",
+        "项目内框架副本路径由 .agents/ + templates/ 改为 .agent-framework/",
+        "任务分级 S/M/L 引入：S 级不再要求任务目录与交接记录",
+        "Merge Record 回写由「下一个任务回填」改为「同一 PR 内自填」"
+      ]
+    },
+    {
+      "version": "1.9.0",
+      "date": "2026-10-15",
+      "type": "MINOR",
+      "summary": "handoff.md 补审查记录命名；TASK.md 模板补 Merge Record 章节与 SHA 映射表",
+      "breaking": []
+    }
+  ]
+}

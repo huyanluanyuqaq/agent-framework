@@ -1,0 +1,30 @@
+name: CI
+
+# 最小可用 CI 模板。项目应按自己的技术栈增补作业。
+# 注意：本项目模板的 CI 属于项目自有资产，不被框架同步覆盖。
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: install-lint-build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit project framework compliance
+        run: python scripts/audit-project.py
+      # ↓↓↓ 按项目技术栈替换以下占位步骤 ↓↓↓
+      - name: Install dependencies
+        run: echo "TODO: 替换为项目的依赖安装命令"
+      - name: Lint
+        run: echo "TODO: 替换为项目的 lint 命令"
+      - name: Build
+        run: echo "TODO: 替换为项目的构建命令"
+      - name: Test
+        run: echo "TODO: 替换为项目的测试命令"

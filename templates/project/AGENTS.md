@@ -168,14 +168,14 @@ Created: {{YYYY-MM-DD}}
 | 运维文档 | `docs/operations/` |
 | 任务 | `tasks/` |
 
-**写文档前请先读：** `.agents/rules/documentation.md`（Workspace 模式）或本文件 §11（Standalone 模式）。
+**写文档前请先读：** `.agent-framework/quality.md`（Workspace 模式）或本文件 §11（Standalone 模式）。
 
 ---
 
 ## 10. Project-specific Rules
 
 > 本节声明本项目对 Workspace 通用规则的**补充、覆盖、增强**。
-> 格式见 `.agents/protocols/rule-precedence.md` §6。
+> 格式见 `.agent-framework/rule-precedence.md` §6。
 > **不得削弱受保护规则（security / change-safety / git 禁止操作 / testing 禁止事项 / permissions §3 P3 职责分离）。**
 
 ```markdown
@@ -189,7 +189,7 @@ Created: {{YYYY-MM-DD}}
 ```markdown
 - [补充] 所有数据库访问必须通过 Repository 层，不得在 Service 层直接使用 ORM。
 - [补充] 公共 API 变更必须同步更新 `docs/architecture/api.md`。
-- [覆盖] Workspace `coding.md` §4：本项目允许在测试代码中使用魔法值。
+- [覆盖] Workspace `quality.md` §4：本项目允许在测试代码中使用魔法值。
 - [增强] 所有涉及认证的变更必须经 Security 角色审查。
 ```
 
@@ -230,7 +230,7 @@ Task 规则（TASK.md 的 Task Rules 节）
 
 **缺失：**
 
-- `.agents/roles/`、`.agents/workflows/`、`.agents/rules/`、`.agents/protocols/`
+- `.agent-framework/`
 
 **应对方式：**
 
@@ -238,7 +238,7 @@ Task 规则（TASK.md 的 Task Rules 节）
    即使在 Standalone 模式下，也必须遵守这些约束。
 2. **完整规范获取**：若需要完整的 Role / Workflow / Protocol 定义，可：
    - 重新 clone 原 Workspace，把本项目放回 `projects/` 下；
-   - 或从原 Workspace 复制 `.agents/` 到项目根目录。
+   - 或从原 Workspace 复制 `.agent-framework/` 到项目根目录。
 
 **Standalone 下的最小工作流：**
 
@@ -262,15 +262,14 @@ Task 规则（TASK.md 的 Task Rules 节）
 
 > **启用条件：** 本项目使用 GitHub 作为协作载体。不使用时，删除本节并在 §10 中注明。
 >
-> 规则依据：`.agents/rules/github.md`、`.agents/protocols/github-collaboration.md`、
-> `.agents/protocols/github-capability-matrix.md`。
+> 规则依据：`.agent-framework/github.md`、`docs/capability/`。
 > **Standalone 模式下**本节仍然有效（能力记录随仓库一起分发）。
 
 ### 14.1 协作位分配
 
 ```yaml
 # 两个协作位必须由不同实例承担（I2：实现者 ≠ 批准者）
-# 定义见 .agents/protocols/dual-agent-model.md
+# 定义见 `.agent-framework/collaboration.md`
 Coordinator: {{承担主控位的实例或角色}}
 Implementer: {{承担执行位的实例或角色}}
 ```
@@ -282,7 +281,7 @@ Implementer: {{承担执行位的实例或角色}}
 | 项 | 值 |
 |----|----|
 | 默认分支 | `{{main}}` |
-| 分支命名 | 见 `.agents/rules/git.md` §1 |
+| 分支命名 | 见 `.agent-framework/git.md` §1 |
 | 合并策略 | `{{rebase-merge}}`（覆盖默认需注明理由） |
 | 合并后删除工作分支 | {{是}} |
 
@@ -318,7 +317,7 @@ Implementer: {{承担执行位的实例或角色}}
 - ❌ 由实现者批准自己提交的交付物
 - ❌ 把未实测或未执行的平台配置描述为已生效
 - ❌ 通过删除测试、放宽断言或绕过保护规则使检查变绿
-- ❌ 未经人类批准执行高风险操作（`.agents/protocols/change-safety.md`）
+- ❌ 未经人类批准执行高风险操作（`.agent-framework/change-safety.md`）
 
 ---
 
