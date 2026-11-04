@@ -40,6 +40,10 @@ FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent.parent
 WORKSPACE_ROOT = FRAMEWORK_ROOT.parent
 PROJECTS_DIR = WORKSPACE_ROOT / "projects"
 
+# 同步范围（任务书 6.2）。审计脚本必须同步 —— 门禁若各项目持一份副本就会漂移，
+# 而漂移的门禁等于没有门禁（PR #43 的教训：F10 丢失正源于此）。
+SYNC_SCRIPTS = ["audit-project.py"]
+
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
     proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
@@ -84,18 +88,20 @@ def sync_one(project_name: str, version: str, dry_run: bool, allow_dirty: bool, 
         print("  [SKIP] 不是 Git 仓库")
         return False
 
-    if not allow_dirty:
-        dirty = git(project, "status", "--porcelain", check=False).stdout.strip()
-        if dirty:
-            print(f"  [FAIL] 工作区不干净，拒绝同步（保护未提交工作）：\n{dirty}")
-            return False
-    else:
-        print("  [WARN] --allow-dirty：跳过工作区检查")
-
     branch = git(project, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
     if branch != "main":
         print(f"  [FAIL] 当前分支 {branch} != main，请先切回")
         return False
+
+    # 工作区检查只对「会写入」的路径生效；dry-run 不落盘，无需干净工作区。
+    if not dry_run:
+        if not allow_dirty:
+            dirty = git(project, "status", "--porcelain", check=False).stdout.strip()
+            if dirty:
+                print(f"  [FAIL] 工作区不干净，拒绝同步（保护未提交工作）：\n{dirty}")
+                return False
+        else:
+            print("  [WARN] --allow-dirty：跳过工作区检查")
 
     src_dir = FRAMEWORK_ROOT / ".agents"
     dst_dir = project / ".agent-framework"
@@ -104,16 +110,30 @@ def sync_one(project_name: str, version: str, dry_run: bool, allow_dirty: bool, 
         print(f"  [FAIL] 源规范目录为空：{src_dir}")
         return False
 
-    print(f"  将同步 {len(files)} 个规范文件 -> .agent-framework/")
+    script_src = FRAMEWORK_ROOT / "shared" / "scripts"
+    scripts = [script_src / s for s in SYNC_SCRIPTS if (script_src / s).is_file()]
+    if not scripts:
+        print(f"  [FAIL] 审计脚本缺失：{script_src}/{SYNC_SCRIPTS}")
+        return False
+
+    print(f"  将同步 {len(files)} 个规范文件 -> .agent-framework/；"
+          f"{len(scripts)} 个脚本 -> shared/scripts/")
     if dry_run:
         for f in files:
             print(f"    [dry-run] {f.name}")
+        for s in scripts:
+            print(f"    [dry-run] shared/scripts/{s.name}")
         print("  [dry-run] 不写入、不提交")
         return True
 
     dst_dir.mkdir(exist_ok=True)
     for f in files:
         shutil.copy2(f, dst_dir / f.name)
+
+    dst_scripts = project / "shared" / "scripts"
+    dst_scripts.mkdir(parents=True, exist_ok=True)
+    for s in scripts:
+        shutil.copy2(s, dst_scripts / s.name)
 
     vf = project / "framework-version.json"
     payload = {
@@ -131,7 +151,7 @@ def sync_one(project_name: str, version: str, dry_run: bool, allow_dirty: bool, 
     else:
         git(project, "checkout", "-b", branch_name)
 
-    git(project, "add", ".agent-framework", "framework-version.json")
+    git(project, "add", ".agent-framework", "framework-version.json", "shared/scripts")
     staged = git(project, "diff", "--cached", "--name-only").stdout.strip()
     if not staged:
         print("  [OK] 无差异，已是最新版本")
@@ -140,7 +160,7 @@ def sync_one(project_name: str, version: str, dry_run: bool, allow_dirty: bool, 
 
     msg = (
         f"chore(framework): sync agent-framework v{version}\n\n"
-        f"同步公共规范到 .agent-framework/（{len(files)} 个文件）。\n"
+        f"同步公共规范到 .agent-framework/（{len(files)} 个文件）与 shared/scripts/（{len(scripts)} 个脚本）。\n"
         f"版本来源：huyanluanyuqaq/agent-framework v{version}\n\n"
         f"Changed files:\n" + "\n".join(f"- {line}" for line in staged.splitlines())
     )
@@ -157,7 +177,7 @@ def sync_one(project_name: str, version: str, dry_run: bool, allow_dirty: bool, 
                  "--body",
                  "## 公共规范同步\n\n"
                  f"- 框架：agent-framework\n- 版本：v{version}\n"
-                 f"- 同步文件：`.agent-framework/**`（{len(files)} 个）\n"
+                 f"- 同步文件：`.agent-framework/**`（{len(files)} 个）、`shared/scripts/audit-project.py`\n"
                  "- 版本文件：`framework-version.json`\n\n"
                  "未覆盖：`AGENTS.md` / `README.md` / 项目技术配置 / 业务代码 / 项目专属 CI"],
                 cwd=project, check=False,

@@ -28,7 +28,8 @@
 - PR **必须**关联任务标识。
 - 实施期间可用草稿状态，自检完成后再标记可审查。
 - **不得只在 PR 里写信息而不回写任务文件。** 两者必须同步。
-- 模板：`templates/github/PULL_REQUEST_TEMPLATE.md`。
+- 模板：项目侧用 `.github/PULL_REQUEST_TEMPLATE.md`（项目自有，不被框架同步覆盖）；
+  字段清单见本文 §3。中央仓的参考模板在 `templates/github/PULL_REQUEST_TEMPLATE.md`。
 
 ### PR 描述必填字段
 
